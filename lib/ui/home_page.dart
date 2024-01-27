@@ -25,13 +25,14 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Image.network('https://developers.giphy.com/branch/master/static/header-logo-0fec0225d189bc0eae27dac3e3770582.gif'),
+        title: Image.network(
+            'https://developers.giphy.com/branch/master/static/header-logo-0fec0225d189bc0eae27dac3e3770582.gif'),
         centerTitle: true,
       ),
       backgroundColor: Colors.black,
-      body: const Column(
+      body: Column(
         children: [
-          Padding(
+          const Padding(
             padding: EdgeInsets.all(16.0),
             child: TextField(
               decoration: InputDecoration(
@@ -44,6 +45,33 @@ class _HomePageState extends State<HomePage> {
                 fontSize: 18,
               ),
               textAlign: TextAlign.center,
+              textCapitalization: TextCapitalization.sentences,
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder(
+              future: _getGifs(),
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting:
+                  case ConnectionState.none:
+                    return Container(
+                      alignment: Alignment.center,
+                      width: 200.0,
+                      height: 200.0,
+                      child: const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 5.0,
+                      ),
+                    );
+                  default:
+                    if (snapshot.hasError) {
+                      return Container();
+                    } else {
+                      return _createGifTable(context, snapshot);
+                    }
+                }
+              },
             ),
           ),
         ],
@@ -54,9 +82,11 @@ class _HomePageState extends State<HomePage> {
   Future<Map> _getGifs() async {
     http.Response response;
     if (_searsh == null) {
-      response = await http.get(Uri.https(_urlGifs, _urlPathTrending, _urlParamTrending));
+      response = await http
+          .get(Uri.https(_urlGifs, _urlPathTrending, _urlParamTrending));
     } else {
-      response = await http.get(Uri.https(_urlGifs, _urlPathSearsh, _urlParamSearsh));
+      response =
+          await http.get(Uri.https(_urlGifs, _urlPathSearsh, _urlParamSearsh));
     }
     return json.decode(response.body);
   }
@@ -65,21 +95,25 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _urlParamSearsh = {
-      'api_key' : dotenv.env['KEY'] ?? '',
-      'q' : _searsh,
-      'limit' : '20',
-      'offset' : '0',
-      'rating' : 'g',
-      'lang' : 'pt',
-      'bundle' : 'messaging_non_clips'
+      'api_key': dotenv.env['KEY'] ?? '',
+      'q': _searsh,
+      'limit': '20',
+      'offset': '0',
+      'rating': 'g',
+      'lang': 'pt',
+      'bundle': 'messaging_non_clips'
     };
     _urlParamTrending = {
-      'api_key' : dotenv.env['KEY'] ?? '',
-      'limit' : '20',
-      'offset' : _offSet.toString(),
-      'rating' : 'g',
-      'bundle' : 'messaging_non_clips'
+      'api_key': dotenv.env['KEY'] ?? '',
+      'limit': '20',
+      'offset': _offSet.toString(),
+      'rating': 'g',
+      'bundle': 'messaging_non_clips'
     };
     _getGifs().then((map) => print(map));
+  }
+
+  Widget _createGifTable(BuildContext context, AsyncSnapshot<Map<dynamic, dynamic>> snapshot) {
+
   }
 }
