@@ -4,6 +4,7 @@ import 'package:buscador_gifs/ui/gif_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:share/share.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -188,6 +189,9 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
               );
+            },
+            onLongPress: () {
+              Share.share(snapshot.data?['data'][index]['images']['fixed_height']['url']);
             },
           );
         } else {
