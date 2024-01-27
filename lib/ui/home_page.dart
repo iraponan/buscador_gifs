@@ -97,7 +97,7 @@ class _HomePageState extends State<HomePage> {
     _urlParamSearsh = {
       'api_key': dotenv.env['KEY'] ?? '',
       'q': _searsh,
-      'limit': '20',
+      'limit': '25',
       'offset': '0',
       'rating': 'g',
       'lang': 'pt',
@@ -105,15 +105,33 @@ class _HomePageState extends State<HomePage> {
     };
     _urlParamTrending = {
       'api_key': dotenv.env['KEY'] ?? '',
-      'limit': '20',
+      'limit': '25',
       'offset': _offSet.toString(),
       'rating': 'g',
       'bundle': 'messaging_non_clips'
     };
-    _getGifs().then((map) => print(map));
   }
 
-  Widget _createGifTable(BuildContext context, AsyncSnapshot<Map<dynamic, dynamic>> snapshot) {
-
+  Widget _createGifTable(
+      BuildContext context, AsyncSnapshot<Map<dynamic, dynamic>> snapshot) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(8.0),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 8.0,
+        mainAxisSpacing: 8.0,
+      ),
+      itemCount: snapshot.data?['pagination']['count'],
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          child: Image.network(
+            snapshot.data?['data'][index]['images']['fixed_height']['url'],
+            semanticLabel: snapshot.data?['data'][index]['title'],
+            height: 300.0,
+            fit: BoxFit.cover,
+          ),
+        );
+      },
+    );
   }
 }
