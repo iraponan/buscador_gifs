@@ -155,13 +155,13 @@ class _HomePageState extends State<HomePage> {
     return json.decode(response.body);
   }
 
-  int _getCount(List data) {
-    if (_searsh == null || _searsh == '') {
-      return data.length;
-    } else {
-      return data.length + 1;
-    }
-  }
+  // int _getCount(List data) {
+  //   if (_searsh == null || _searsh == '') {
+  //     return data.length;
+  //   } else {
+  //     return data.length + 1;
+  //   }
+  // }
 
   Widget _createGifTable(context, snapshot) {
     return GridView.builder(
@@ -171,11 +171,9 @@ class _HomePageState extends State<HomePage> {
         crossAxisSpacing: 8.0,
         mainAxisSpacing: 8.0,
       ),
-      itemCount: _getCount(snapshot.data?['data']),
+      itemCount: snapshot.data?['data'].length + 1,
       itemBuilder: (context, index) {
-        if (_searsh == null ||
-            _searsh == '' ||
-            index < snapshot.data?['data'].length) {
+        if (index < snapshot.data?['data'].length) {
           return GestureDetector(
             child: FadeInImage.memoryNetwork(
               placeholder: kTransparentImage,
