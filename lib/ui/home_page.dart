@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -155,7 +156,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   int _getCount(List data) {
-    if (_searsh == null) {
+    if (_searsh == null || _searsh == '') {
       return data.length;
     } else {
       return data.length + 1;
@@ -172,11 +173,13 @@ class _HomePageState extends State<HomePage> {
       ),
       itemCount: _getCount(snapshot.data?['data']),
       itemBuilder: (context, index) {
-        if (_searsh == null || _searsh == '' || index < snapshot.data?['data'].length) {
+        if (_searsh == null ||
+            _searsh == '' ||
+            index < snapshot.data?['data'].length) {
           return GestureDetector(
-            child: Image.network(
-              snapshot.data?['data'][index]['images']['fixed_height']['url'],
-              semanticLabel: snapshot.data?['data'][index]['title'],
+            child: FadeInImage.memoryNetwork(
+              placeholder: kTransparentImage,
+              image: snapshot.data?['data'][index]['images']['fixed_height']['url'],
               height: 300.0,
               fit: BoxFit.cover,
             ),
@@ -191,7 +194,8 @@ class _HomePageState extends State<HomePage> {
               );
             },
             onLongPress: () {
-              Share.share(snapshot.data?['data'][index]['images']['fixed_height']['url']);
+              Share.share(snapshot.data?['data'][index]['images']
+                  ['fixed_height']['url']);
             },
           );
         } else {
