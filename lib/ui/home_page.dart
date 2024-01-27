@@ -32,20 +32,26 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.black,
       body: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
             child: TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Pesquise Aqui',
                 labelStyle: TextStyle(color: Colors.white),
                 border: OutlineInputBorder(),
               ),
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
               ),
               textAlign: TextAlign.center,
-              textCapitalization: TextCapitalization.sentences,
+              //textCapitalization: TextCapitalization.sentences,
+              onSubmitted: (text) {
+                setState(() {
+                  _searsh = text;
+                  _offSet = 0;
+                });
+              },
             ),
           ),
           Expanded(
@@ -80,25 +86,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<Map> _getGifs() async {
-    http.Response response;
-    if (_searsh == null) {
-      response = await http
-          .get(Uri.https(_urlGifs, _urlPathTrending, _urlParamTrending));
-    } else {
-      response =
-          await http.get(Uri.https(_urlGifs, _urlPathSearsh, _urlParamSearsh));
-    }
-    return json.decode(response.body);
-  }
-
-  @override
-  void initState() {
-    super.initState();
     _urlParamSearsh = {
       'api_key': dotenv.env['KEY'] ?? '',
       'q': _searsh,
       'limit': '25',
-      'offset': '0',
+      'offset': _offSet.toString(),
       'rating': 'g',
       'lang': 'pt',
       'bundle': 'messaging_non_clips'
@@ -110,10 +102,26 @@ class _HomePageState extends State<HomePage> {
       'rating': 'g',
       'bundle': 'messaging_non_clips'
     };
+    http.Response response;
+    if (_searsh == null) {
+      response = await http
+          .get(Uri.https(_urlGifs, _urlPathTrending, _urlParamTrending));
+    } else {
+      response =
+          await http.get(Uri.https(_urlGifs, _urlPathSearsh, _urlParamSearsh));
+    }
+    return json.decode(response.body);
   }
 
-  Widget _createGifTable(
-      BuildContext context, AsyncSnapshot<Map<dynamic, dynamic>> snapshot) {
+  int _getCount(List data) {
+    if (_searsh == null) {
+      return data.length;
+    } else {
+      return data.length + 1;
+    }
+  }
+
+  Widget _createGifTable(context, snapshot) {
     return GridView.builder(
       padding: const EdgeInsets.all(8.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -121,16 +129,45 @@ class _HomePageState extends State<HomePage> {
         crossAxisSpacing: 8.0,
         mainAxisSpacing: 8.0,
       ),
-      itemCount: snapshot.data?['pagination']['count'],
+      itemCount: _getCount(snapshot.data?['data']),
       itemBuilder: (context, index) {
-        return GestureDetector(
-          child: Image.network(
-            snapshot.data?['data'][index]['images']['fixed_height']['url'],
-            semanticLabel: snapshot.data?['data'][index]['title'],
-            height: 300.0,
-            fit: BoxFit.cover,
-          ),
-        );
+        if (_searsh == null || index < snapshot.data?['data'].length) {
+          return GestureDetector(
+            child: Image.network(
+              snapshot.data?['data'][index]['images']['fixed_height']['url'],
+              semanticLabel: snapshot.data?['data'][index]['title'],
+              height: 300.0,
+              fit: BoxFit.cover,
+            ),
+          );
+        } else {
+          return Container(
+            child: GestureDetector(
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    size: 70.0,
+                  ),
+                  Text(
+                    'Carregar mais...',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22.0,
+                    ),
+                  )
+                ],
+              ),
+              onTap: () {
+                setState(() {
+                  _offSet += 25;
+                });
+              },
+            ),
+          );
+        }
       },
     );
   }
